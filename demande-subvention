@@ -32,6 +32,13 @@ h2 {
     box-shadow: 0 3px 15px rgba(0,0,0,0.13);
 }
 
+/* ✅ UNE SEULE VERSION PROPRE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
 th, td {
     border: 1px solid #ccc;
     padding: 5px;
@@ -66,8 +73,6 @@ input {
     background: transparent;
 }
 
-input[type="text"] { text-align: left; }
-
 .locked {
     background: #e0e0e0 !important;
     pointer-events: none;
@@ -86,30 +91,9 @@ button {
 .btn-red { background: #c62828; color: white; }
 .btn-blue { background: #1565c0; color: white; }
 .btn-purple { background: #6a1b9a; color: white; }
-
-#rapport {
-    width: 100%;
-    overflow: visible !important;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: auto; /* 🔥 essentiel pour PDF */
-}
-
-tr, td {
-    page-break-inside: avoid;
-}
-
-h2 {
-    page-break-before: auto;
-}
 </style>
 
-<!-- ✅ CDN fiable -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 </head>
 
 <body>
@@ -119,9 +103,7 @@ h2 {
 <h2 class="titre-recettes">🟢 RECETTES</h2>
 
 <table id="recettes">
-<tr>
-<th></th><th>2025</th><th>2026</th><th>2027</th>
-</tr>
+<tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr>
 
 <tr>
 <td class="label">Report excédentaire</td>
@@ -149,9 +131,7 @@ h2 {
 <h2 class="titre-depenses">🔴 DÉPENSES</h2>
 
 <table id="depenses">
-<tr>
-<th></th><th>2025</th><th>2026</th><th>2027</th>
-</tr>
+<tr><th></th><th>2025</th><th>2026</th><th>2027</th></tr>
 
 <tr><td class="label">Personnel</td><td><input type="number"></td><td><input type="number"></td><td><input type="number"></td></tr>
 <tr><td class="label">Gestion</td><td><input type="number"></td><td><input type="number"></td><td><input type="number"></td></tr>
@@ -181,7 +161,6 @@ h2 {
 </div>
 
 <script>
-
 function addRow(id) {
     const name = prompt("Nom ?");
     if (!name) return;
@@ -203,6 +182,8 @@ function calc() {
     let d = sum("depenses", ["d1","d2","d3"]);
 
     let s1 = r[0] - d[0];
+    s1 = isNaN(s1) ? 0 : s1;
+
     document.getElementById("s1").value = s1.toFixed(2);
     document.getElementById("rep2").value = s1.toFixed(2);
 
@@ -210,6 +191,8 @@ function calc() {
     d = sum("depenses", ["d1","d2","d3"]);
 
     let s2 = r[1] - d[1];
+    s2 = isNaN(s2) ? 0 : s2;
+
     document.getElementById("s2").value = s2.toFixed(2);
     document.getElementById("rep3").value = s2.toFixed(2);
 
@@ -217,6 +200,8 @@ function calc() {
     d = sum("depenses", ["d1","d2","d3"]);
 
     let s3 = r[2] - d[2];
+    s3 = isNaN(s3) ? 0 : s3;
+
     document.getElementById("s3").value = s3.toFixed(2);
 }
 
@@ -244,44 +229,16 @@ function sum(id, targets) {
 function exportPDF() {
     const element = document.getElementById("rapport");
 
-    if (!window.html2pdf) {
-        alert("Erreur : html2pdf non chargé");
-        return;
-    }
-
-    // 🔥 clone pour stabiliser le rendu
     const clone = element.cloneNode(true);
-
-    // 🔥 on force une largeur adaptée au PDF
     clone.style.width = "1100px";
-    clone.style.padding = "20px";
-    clone.style.background = "white";
-
-    // 🔥 on l'ajoute temporairement au DOM (IMPORTANT)
     clone.style.position = "absolute";
     clone.style.left = "-9999px";
     document.body.appendChild(clone);
 
-    const opt = {
-        margin: 5,
-        filename: 'rapport_subvention.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'landscape'
-        }
-    };
-
-    html2pdf().set(opt).from(clone).save().then(() => {
-        document.body.removeChild(clone); // nettoyage
+    html2pdf().from(clone).save().then(() => {
+        document.body.removeChild(clone);
     });
 }
-
 </script>
 
 </body>
