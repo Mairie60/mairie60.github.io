@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -29,12 +30,6 @@ h2 {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 3px 15px rgba(0,0,0,0.13);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
 }
 
 th, td {
@@ -99,7 +94,8 @@ button {
 
 table {
     width: 100%;
-    table-layout: auto; /* 🔥 IMPORTANT */
+    border-collapse: collapse;
+    table-layout: auto; /* 🔥 essentiel pour PDF */
 }
 
 tr, td {
@@ -253,25 +249,37 @@ function exportPDF() {
         return;
     }
 
+    // 🔥 clone pour stabiliser le rendu
+    const clone = element.cloneNode(true);
+
+    // 🔥 on force une largeur adaptée au PDF
+    clone.style.width = "1100px";
+    clone.style.padding = "20px";
+    clone.style.background = "white";
+
+    // 🔥 on l'ajoute temporairement au DOM (IMPORTANT)
+    clone.style.position = "absolute";
+    clone.style.left = "-9999px";
+    document.body.appendChild(clone);
+
     const opt = {
         margin: 5,
         filename: 'rapport_subvention.pdf',
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { 
-            scale: 3,
-            scrollX: 0,
-            scrollY: 0,
+        html2canvas: {
+            scale: 2,
             useCORS: true
         },
-        jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'landscape' 
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'landscape'
+        }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(clone).save().then(() => {
+        document.body.removeChild(clone); // nettoyage
+    });
 }
 
 </script>
